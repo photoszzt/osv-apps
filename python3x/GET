@@ -8,8 +8,13 @@ PYTHON_PREFIX_DIR=`python3 -c 'import sys; print(sys.prefix)'`
 PYTHON_MAJOR_VERSION=`python3 -c 'import sys; print(sys.version_info.major)'`
 PYTHON_MINOR_VERSION=`python3 -c 'import sys; print(sys.version_info.minor)'`
 PYTHON_VERSION="${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}"
-PYTHON_MODULES="" #put additional modules here. Example: "django mysql mysql.connector"
-
+# flask gevent and numpy dependency
+#PYTHON_MODULES="flask gevent numpy werkzeug jinja2 click itsdangerous markupsafe greenlet" #put additional modules here. Example: "django mysql mysql.connector"
+# boto3 and dependency
+#PYTHON_MODULES="boto3 botocore jmespath s3transfer docutils dateutil urllib3 six" #put additional modules here. Example: "django mysql mysql.connector"
+# pyOpenSSL
+# PYTHON_MODULES="OpenSSL six cryptography asn1crypto cffi pycparser _cffi_backend idna" #put additional modules here. Example: "django mysql mysql.connector"
+PYTHON_MODULES="boto3 botocore jmespath s3transfer docutils dateutil urllib3 six PIL flask gevent werkzeug jinja2 click itsdangerous markupsafe greenlet"
 
 install_shlibs() {
 SHLIBS=""
@@ -55,7 +60,8 @@ EOF
 
 main() {
 mkdir -p build/
-gcc -o build/python.so python.c -fPIC -shared -lpython${PYTHON_VERSION}m
+PYLDFLAGS=$(python -c "import sysconfig; print(sysconfig.get_config_var('LDFLAGS'))")
+gcc -o build/python.so python.c -fPIC -shared -lpython${PYTHON_VERSION}m $PYLDFLAGS -lc
 
 rm -rf "$ROOTFS"
 mkdir -p "$ROOTFS/usr/lib"
